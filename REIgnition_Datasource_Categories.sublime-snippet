@@ -1,0 +1,39 @@
+<snippet>
+	<content><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html" encoding="iso-8859-1" />
+
+	<!--
+		datasource parameters
+		http://www.reignitioncms.com/users-guide/reference/templates/base-data-sources/index.aspx
+	-->
+
+	<xsl:param name="retCmsId" />  <!-- integer  Specifies the ID number of the page calling the data source -->
+
+	<!--
+		template parameters
+	-->
+
+	<!--
+		template variables
+	-->
+
+	<xsl:template match="//categories">
+
+		<xsl:apply-templates select="category" />
+
+	</xsl:template>
+
+	<xsl:template match="category">
+
+
+
+	</xsl:template>
+
+</xsl:stylesheet>
+		]]>
+	</content>
+	<tabTrigger>reidscategories</tabTrigger>
+</snippet>

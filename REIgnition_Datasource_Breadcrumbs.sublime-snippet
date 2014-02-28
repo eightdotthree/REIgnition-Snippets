@@ -1,0 +1,65 @@
+<snippet>
+	<content><![CDATA[
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html" encoding="utf-8" />
+
+	<!--
+		template request parameters
+	-->
+
+	<!--
+		template variables
+	-->
+	<xsl:variable name="site_name">Insert Site Name Here</xsl:variable>
+
+
+	<xsl:template match="//sitemap">
+
+		<nav id="breadcrumbs" class="breadcrumbs" role="navigation">
+			<ul>
+				<xsl:apply-templates select="siteMapNode" />
+			</ul>
+		</nav>
+
+	</xsl:template>
+
+
+	<xsl:template match="siteMapNode">
+
+		<li class="breadcrumb-item">
+
+			<xsl:choose>
+
+				<xsl:when test="position() = 1">
+					<xsl:attribute name="class">
+						<xsl:text>breadcrumb-item breadcrumb-home</xsl:text>
+					</xsl:attribute>
+					<a href="{@url}" title="Return to the {$site_name} home page">Home</a>
+				</xsl:when>
+
+				<xsl:when test="position() = last()">
+					<xsl:attribute name="class">
+						<xsl:text>breadcrumb-item breadcrumb-active</xsl:text>
+					</xsl:attribute>
+					<xsl:value-of select="@title" />
+				</xsl:when>
+
+				<xsl:otherwise>
+					<a href="{@url}" title="{@title}">
+						<xsl:value-of select="@title" />
+					</a>
+				</xsl:otherwise>
+
+			</xsl:choose>
+
+		</li>
+
+	</xsl:template>
+
+</xsl:stylesheet>
+		]]>
+	</content>
+	<tabTrigger>reidsbreadcrumbs</tabTrigger>
+</snippet>

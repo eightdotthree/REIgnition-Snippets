@@ -27,9 +27,16 @@
 	-->
 
 	<xsl:template match="/">
+		<xsl:if test="//Page">
+			<!-- outer markup here! -->
+			<xsl:apply-templates match="//Page">
+				<xsl:sort select="SortOrder" data-type="number" />
+			</xsl:apply-templates>
+			<!-- close outer markup -->
+		</xsl:if>
+	</xsl:template>
 
-        <xsl:if test="//Page">
-        </xsl:if>
+	<xsl:template match="//Page">
 
 	</xsl:template>
 

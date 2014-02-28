@@ -29,7 +29,7 @@
 	<xsl:template match="/">
 		<xsl:if test="//Page">
 			<!-- outer markup here! -->
-			<xsl:apply-templates match="//Page">
+			<xsl:apply-templates select="//Page">
 				<xsl:sort select="SortOrder" data-type="number" />
 			</xsl:apply-templates>
 			<!-- close outer markup -->

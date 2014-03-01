@@ -10,27 +10,22 @@ Mac:
 Tab Triggers:
 -------
 
-Site Navigation
------------------
+### Site Navigation
 
 reidssitenavigation
 
-Search Results
------------------
+### Search Results
 
 reidssearchresults
 
-Categorized List
------------------
+### Categorized List
 
 reidscategorizedlist
 
-Categories
------------------
+### Categories
 
 reidscategories
 
-Breadcrumbs
------------------
+### Breadcrumbs
 
 reidsbreadcrumbs

@@ -1,0 +1,222 @@
+<snippet>
+	<content><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+	<xsl:output method="html" encoding="iso-8859-1" />
+
+	<!--
+		Returns XML for a list of content items (pages, files, news releases, and events) based on submitted parameters and defaults to return all content items in the absence of any parameters.
+	  -->
+
+	<!--
+		datasource parameters
+		http://www.reignitioncms.com/users-guide/reference/templates/base-data-sources/index.aspx
+	-->
+	<xsl:param name="keywords" /> 		<!-- string    	Set of keywords. Multiple keywords can be passed  by separating by + sign. -->
+	<xsl:param name="type" />     		<!-- string    	File, Page, News, Event 	Specifies the specific content type to return. In the absence of this parameter, all types are returned. -->
+	<xsl:param name="sortField" />  	<!-- string		random, title, startDate   	Specifies the field to use to sort the results. If the parameter is empty, the default value is title. The startDate value applies to the release date for the News content type. -->
+	<xsl:param name="sortReverse" /> 	<!-- boolean    Specifies to sort results in reverse order. The default value is false. -->
+	<xsl:param name="pageIndex" /> 		<!-- integer	Specifies the current page in the results set. Default value is 0 when the paging parameter is set to true. Default value is -1 when the paging parameter is set to any value other than true. -->
+	<xsl:param name="pageSize" /> 		<!-- integer	Specifies the number of items per page. Default value is 20. -->
+	<xsl:param name="paging" /> 		<!-- boolean	Specifies if returned results set will support paging. Default value is false. -->
+	<xsl:param name="category" /> 		<!-- integer	Specifies the ID number of the category. To pass multiple categories, separate with commas (category=1,2,3) or use multiple instances of the parameter (category=123&category=456). -->
+	<xsl:param name="categoryId" /> 	<!-- integer	Specifies the ID number of the category. Supports a value of a single category ID number. -->
+	<xsl:param name="mustMatchCats" /> 	<!-- boolean	Specifies if a news release must be a member of all categories specified in the category parameter. The default value is false. -->
+	<xsl:param name="retCmsId" /> 		<!-- integer 	Specifies value of the current page. Used for the related content portion of this data source. -->
+	<xsl:param name="pageId" /> 		<!-- integer	Specifies the value of the current page. Used for the related content portion of this data source. Takes precedence over the retCmsId parameter if both are passed to the data source. -->
+
+	<!--
+		template parameters
+	-->
+
+	<!--
+		template variables
+	-->
+	<xsl:variable name="searchResultsURL" select="/search-resuts/" />
+
+	<xsl:template match="/">
+
+    	<xsl:call-template name="search_form" />
+
+	    <xsl:choose>
+
+	    	<xsl:when test="$recordCount != 0">
+
+	    		<ol class="search-results">
+
+	    			<xsl:apply-templates select="//siteMapNode">
+	    				<!-- <xsl:sort select="@type" /> -->
+	    			</xsl:apply-templates>
+
+	    		</ol>
+
+	    		<xsl:call-template name="paging" />
+
+	    	</xsl:when>
+
+	    	<xsl:when test="$Keywords = ''">
+	    	</xsl:when>
+
+	    	<xsl:otherwise>
+	    		<h2>Your search for the keyword(s) "<xsl:value-of select="$keywordsNoAmp" />" <xsl:if test="$type != ''"><xsl:text> </xsl:text> and type "<xsl:value-of select="$type" />"</xsl:if> did not return results.</h2>
+	    		<h3>Search Tips:</h3>
+	    		<ol>
+	    			<li>Check the spelling of the keyword.</li>
+	    			<li>Try to search using a different keyword.</li>
+	    			<li>Try to search using fewer keywords. When multiple keywords are searched, only items that have at least one instance of all of the keywords are returned.</li>
+	    		</ol>
+	    	</xsl:otherwise>
+
+	    </xsl:choose>
+
+  	</xsl:template>
+
+
+  	<!--
+  		match siteMapNode and output the search results
+  	  -->
+  	<xsl:template match="siteMapNode">
+
+  		<li class="search-results-result vcard f">
+
+			<!--member title and link, determined by @Type and/or $rei_section-->
+			<h3 class="fn org">
+
+				<a title="More details about {@title}" class="url">
+					<xsl:attribute name="href">
+						<xsl:choose>
+							<xsl:when test="@type = 'Page'"><xsl:value-of select="@url" /></xsl:when>
+							<xsl:when test="@type = 'Event'"><xsl:value-of select="@url" /></xsl:when>
+							<xsl:when test="@type = 'News'">/media-room/news/details/index.aspx?nid=<xsl:value-of select="@url" /></xsl:when>
+							<xsl:when test="@type = 'File'"><xsl:value-of select="@url" /></xsl:when>
+						</xsl:choose>
+					</xsl:attribute>
+					<xsl:value-of select="@title" />
+				</a>
+
+			</h3>
+
+			<xsl:if test="@address1 != ''">
+				<p class="busAddress" data-type="{@type}">
+					<em>
+						<xsl:value-of select="@address1" />
+						<xsl:if test="@address2 != ''">,<xsl:text> </xsl:text><xsl:value-of select="@address2" /></xsl:if>
+						<xsl:if test="@city != ''">,<xsl:text> </xsl:text><xsl:value-of select="@city " /></xsl:if>
+						<xsl:if test="@state != ''"><xsl:text> </xsl:text><xsl:value-of select="@state" /></xsl:if>
+						<xsl:if test="@postalCode!= ''"><xsl:text> </xsl:text><xsl:value-of select="@postalCode" /></xsl:if>
+					</em>
+				</p>
+			</xsl:if>
+
+			<xsl:if test="@description != ''">
+				<p class="description">
+					<xsl:choose>
+						<xsl:when test="string-length(@description) &gt; 200">
+							<xsl:call-template name="remove-html">
+								<xsl:with-param name="text">
+									<xsl:value-of select="substring(@description, 0, 200)" />...
+								</xsl:with-param>
+							</xsl:call-template>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:call-template name="remove-html">
+								<xsl:with-param name="text">
+									<xsl:value-of select="@description" />
+								</xsl:with-param>
+							</xsl:call-template>
+						</xsl:otherwise>
+					</xsl:choose>
+				</p>
+			</xsl:if>
+
+  		</li>
+
+  	</xsl:template>
+
+
+  	<!--
+  		search form
+  	  -->
+  	<xsl:template name="search_form">
+
+  	  	<form id="search-results-form" class="search-results-form clearfix" action="{$searchResultsURL}" method="POST" name="search-results-form">
+
+  	  		<fieldset>
+  	  			<label for="keyword">Keyword</label>
+  	  			<input type="search" name="keywords" id="keyword" placeholder="Search Again" value="{$Keywords}" class="search-results-keywords" />
+  	  			<input type="hidden" name="pageindex" value="0" />
+  	  			<input type="hidden" name="pagesize" value="10" />
+  	  			<button type="submit" name="search-button" class="search-results-button">Search</button>
+  	  		</fieldset>
+
+  	  	</form>
+
+	</xsl:template>
+
+
+  	<!--
+  		paging
+  	  -->
+	<xsl:template name="paging">
+
+    	<xsl:if test="$pageCount &gt; 1">
+
+      		<ul class="paging clearfix noprint">
+
+        		<xsl:if test="$pageIndex != 0">
+          			<li><a href="?pageIndex={($pageIndex)-1}&amp;Keywords={$keywordsNoAmp}&amp;pageSize={$pageSize}" title="Go to the previous page of the site search results">Previous</a></li>
+        		</xsl:if>
+
+        		<xsl:call-template name="pagingloop" />
+
+        		<xsl:if test="($pageIndex+1) != $pageCount">
+          			<li><a class="next" href="?pageIndex={($pageIndex)+1}&amp;Keywords={$keywordsNoAmp}&amp;pageSize={$pageSize}" title="Go to the next page of the site search results">Next</a></li>
+        		</xsl:if>
+
+      		</ul>
+
+      		<xsl:if test="($pageIndex+1) != $pageCount">
+        		<a href="?pageIndex={($pageIndex)+1}&amp;Keywords={$keywordsNoAmp}&amp;pageSize={$pageSize}" id="showNext" class="btn-flat fill gold upper">
+          			Show Next <xsl:value-of select="$nextPageSize" /> Search Results
+        		</a>
+      		</xsl:if>
+
+    	</xsl:if>
+
+  	</xsl:template>
+
+  	<!-- paging loop -->
+	<xsl:template name="pagingloop">
+
+    	<xsl:param name="count" select="1" />
+
+    	<xsl:choose>
+      		<xsl:when test="($count)-1 = $pageIndex">
+        		<li><span><xsl:value-of select="$count" /></span></li>
+      		</xsl:when>
+      		<xsl:when test="($count)-2 = $pageIndex or ($count)-3 = $pageIndex or ($count)-4 = $pageIndex or ($count)-5 = $pageIndex or ($count)-6 = $pageIndex or ($count) = $pageIndex or ($count)+1 = $pageIndex or ($count)+2 = $pageIndex or ($count)+3 = $pageIndex or ($count)+4 = $pageIndex">
+        		<li>
+          			<a href="?pageIndex={($count)-1}&amp;Keywords={$Keywords}&amp;pageSize={$pageSize}&amp;type={$type}" title="Go to page {$count} of the site search results">
+            			<xsl:if test="($count)+4 = $pageIndex and not($count=1)">...</xsl:if>
+            			<xsl:value-of select="$count" />
+            			<xsl:if test="($count)-6 = $pageIndex">...</xsl:if>
+          			</a>
+        		</li>
+      		</xsl:when>
+    	</xsl:choose>
+
+    	<xsl:if test="$count &lt; $pageCount">
+      		<xsl:call-template name="pagingloop">
+        		<xsl:with-param name="count" select="$count + 1" />
+      		</xsl:call-template>
+    	</xsl:if>
+
+  	</xsl:template>
+
+</xsl:stylesheet>
+		]]>
+	</content>
+
+	<tabTrigger>reidscategorizedlist</tabTrigger>
+</snippet>
